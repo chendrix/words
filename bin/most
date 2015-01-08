@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+
+require 'words'
+require 'optparse'
+
+options_parser = OptionParser.new do |opts|
+  opts.banner = 'Usage: most FILE'
+
+  opts.on('-h', '--help', 'Display help text') do
+    puts opts
+    exit(false)
+  end
+end
+
+options_parser.parse!
+
+file = ARGV[0]
+
+unless file
+  puts options_parser
+  exit(false)
+end
+
+begin
+  words_file = File.open(ARGV.fetch(0) { 'short.txt' })
+  words_corpus = Set.new
+
+  words_file.each do |line|
+    words_corpus.add(line.chomp)
+  end
+
+  corpus = Words::Corpus.new(words_corpus)
+
+  puts({
+    corpus_length: words_corpus.length,
+    word_with_most_subwords_in_corpus: corpus.word_with_most_subwords_in_corpus
+  })
+
+  exit(true)
+rescue StandardError => e
+  puts "#{e.class}: #{e.message}\n\n"
+  puts options_parser
+  exit(false)
+rescue SignalException, Interrupt
+  raise
+end
